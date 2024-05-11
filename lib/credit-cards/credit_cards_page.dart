@@ -168,83 +168,88 @@ class _CreditCardsStackState extends State<CreditCardsStack>
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-        animation: animationController,
-        builder: (context, _) {
-          return Stack(
-            clipBehavior: Clip.none,
-            children: List.generate(
-              widget.itemCount + 1,
-              (stackIndexWithPlaceholder) {
-                final index = stackIndexWithPlaceholder - 1;
-                final modIndex = getModIndexFromActiveIndex(
-                  index,
-                  activeIndex,
-                  widget.itemCount,
-                );
+      animation: animationController,
+      builder: (context, _) {
+        return Stack(
+          clipBehavior: Clip.none,
+          children: List.generate(
+            widget.itemCount + 1,
+            (stackIndexWithPlaceholder) {
+              final index = stackIndexWithPlaceholder - 1;
+              final modIndex = getModIndexFromActiveIndex(
+                index,
+                activeIndex,
+                widget.itemCount,
+              );
 
-                Widget child = widget.itemBuilder(context, modIndex);
+              Widget child = widget.itemBuilder(context, modIndex);
 
-                // Build the hidden placeholder card
-                if (stackIndexWithPlaceholder == 0) {
-                  return Positioned(
-                    top: 0,
-                    left: 0,
-                    child: Transform.scale(
-                      scale: minCardScale,
-                      alignment: Alignment.topCenter,
-                      child: child,
-                    ),
-                  );
-                }
-
-                // Build the last, draggable card
-                if (index == widget.itemCount - 1) {
-                  return AnimatedPositioned(
-                    duration: dragDuration,
-                    left: dragOffset.dx,
-                    bottom: -dragOffset.dy,
-                    child: Transform.translate(
-                      offset: throwAnimation.value,
-                      child: GestureDetector(
-                        onPanStart: _onPanStart,
-                        onPanUpdate: _onPanUpdate,
-                        onPanEnd: _onPanEnd,
-                        onTap: () => widget.onCardTap?.call(modIndex),
-                        behavior: HitTestBehavior.opaque,
-                        child: Opacity(
-                          opacity: 1 - curvedAnimation.value,
-                          child: child,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-
-                // Build the cards in between (remaining cards)
-                /// To gradually scale down widgets, limited by min and max scales
-                final scaleByIndex = minCardScale +
-                    ((maxCardScale - minCardScale) / (widget.itemCount - 1)) *
-                        index;
-
-                // Slide cards up gradually
-                final bottomOffsetByIndex =
-                    -cardsOffset * (widget.itemCount - 1 - index);
-
+              // Build the hidden placeholder card
+              if (stackIndexWithPlaceholder == 0) {
                 return Positioned(
+                  top: 0,
                   left: 0,
-                  bottom: 0,
+                  child: Transform.scale(
+                    scale: minCardScale,
+                    alignment: Alignment.topCenter,
+                    child: child,
+                  ),
+                );
+              }
+
+              // Build the last, draggable card
+              if (index == widget.itemCount - 1) {
+                return AnimatedPositioned(
+                  duration: dragDuration,
+                  left: dragOffset.dx,
+                  bottom: -dragOffset.dy,
                   child: Transform.translate(
-                    offset: Offset(0, bottomOffsetByIndex),
-                    child: Transform.scale(
-                      scale: scaleByIndex,
-                      alignment: Alignment.topCenter,
-                      child: child,
+                    offset: throwAnimation.value,
+                    child: GestureDetector(
+                      onPanStart: _onPanStart,
+                      onPanUpdate: _onPanUpdate,
+                      onPanEnd: _onPanEnd,
+                      onTap: () => widget.onCardTap?.call(modIndex),
+                      behavior: HitTestBehavior.opaque,
+                      child: Opacity(
+                        opacity: 1 - curvedAnimation.value,
+                        child: child,
+                      ),
                     ),
                   ),
                 );
-              },
-            ),
-          );
-        });
+              }
+
+              // Build the cards in between (remaining cards)
+              /// To gradually scale down widgets, limited by min and max scales
+              final scaleByIndex = minCardScale +
+                  ((maxCardScale - minCardScale) / (widget.itemCount - 1)) *
+                      index;
+
+              // Slide cards up gradually
+              final bottomOffsetByIndex =
+                  -cardsOffset * (widget.itemCount - 1 - index);
+
+              return Positioned(
+                left: 0,
+                bottom: 0,
+                child: Transform.translate(
+                  offset: Offset(
+                    0,
+                    bottomOffsetByIndex + cardsOffset * curvedAnimation.value,
+                  ),
+                  child: Transform.scale(
+                    scale:
+                        scaleByIndex + scaleDifference * curvedAnimation.value,
+                    alignment: Alignment.topCenter,
+                    child: child,
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 }
