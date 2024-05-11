@@ -101,10 +101,16 @@ class _CreditCardPageState extends State<CreditCardPage> {
             scale: index == activeIndex ? 1 : 0.85,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            child: CreditCard(
-              width: cardWidth,
-              data: cards[index],
-              isFront: true,
+            child: HeroMode(
+              enabled: index == activeIndex,
+              child: Hero(
+                tag: 'card_${cards[index].id}',
+                child: CreditCard(
+                  width: cardWidth,
+                  data: cards[index],
+                  isFront: true,
+                ),
+              ),
             ),
           );
         },

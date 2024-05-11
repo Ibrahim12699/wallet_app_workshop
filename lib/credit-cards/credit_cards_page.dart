@@ -55,11 +55,14 @@ class _CreditCardsPageState extends State<CreditCardsPage> {
             return Align(
               widthFactor: cardHeight / cardWidth,
               heightFactor: cardWidth / cardHeight,
-              child: Transform.rotate(
-                angle: -pi / 2,
-                child: CreditCard(
-                  width: cardWidth,
-                  data: cards[index],
+              child: Hero(
+                tag: 'card_${cards[index].id}',
+                child: Transform.rotate(
+                  angle: -pi / 2,
+                  child: CreditCard(
+                    width: cardWidth,
+                    data: cards[index],
+                  ),
                 ),
               ),
             );
@@ -192,7 +195,10 @@ class _CreditCardsStackState extends State<CreditCardsStack>
                   child: Transform.scale(
                     scale: minCardScale,
                     alignment: Alignment.topCenter,
-                    child: child,
+                    child: HeroMode(
+                      enabled: false,
+                      child: child,
+                    ),
                   ),
                 );
               }
