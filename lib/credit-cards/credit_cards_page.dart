@@ -93,6 +93,7 @@ class _CreditCardsStackState extends State<CreditCardsStack>
   late final AnimationController animationController;
   int activeIndex = 0;
   Offset dragOffset = Offset.zero;
+  Duration dragDuration = Duration.zero;
 
   double get scaleDifference =>
       (maxCardScale - minCardScale) / (widget.itemCount - 1);
@@ -104,7 +105,9 @@ class _CreditCardsStackState extends State<CreditCardsStack>
   }
 
   void _onPanStart(DragStartDetails details) {
-    //...
+    if (dragDuration > Duration.zero) {
+      dragDuration = Duration.zero;
+    }
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
@@ -122,6 +125,7 @@ class _CreditCardsStackState extends State<CreditCardsStack>
         });
       });
     } else {
+      dragDuration = dragSnapDuration;
       setState(() {
         dragOffset = Offset.zero;
       });
@@ -174,7 +178,8 @@ class _CreditCardsStackState extends State<CreditCardsStack>
 
           // Build the last, draggable card
           if (index == widget.itemCount - 1) {
-            return Positioned(
+            return AnimatedPositioned(
+              duration: dragDuration,
               left: dragOffset.dx,
               bottom: -dragOffset.dy,
               child: GestureDetector(
