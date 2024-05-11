@@ -95,7 +95,7 @@ class _CreditCardsStackState extends State<CreditCardsStack>
   double get scaleDifference =>
       (maxCardScale - minCardScale) / (widget.itemCount - 1);
 
-  Future<void> _handleDismiss() async {
+  Future<void> _handleRelease() async {
     setState(() {
       activeIndex++;
     });
@@ -110,7 +110,7 @@ class _CreditCardsStackState extends State<CreditCardsStack>
   }
 
   void _onPanEnd(DragEndDetails details) {
-    _handleDismiss();
+    _handleRelease();
   }
 
   @override
