@@ -6,7 +6,7 @@ import 'package:wallet_app_workshop/core/utils.dart';
 import 'package:wallet_app_workshop/credit-cards/credit_card.dart';
 import 'package:wallet_app_workshop/credit-cards/credit_card_page.dart';
 
-const pageTransitionDuration = Duration(milliseconds: 1000);
+const pageTransitionDuration = Duration(milliseconds: 800);
 const dragSnapDuration = Duration(milliseconds: 200);
 const dragThreshold = Offset(70, 70);
 const minCardScale = 0.6;
@@ -45,9 +45,10 @@ class _CreditCardsPageState extends State<CreditCardsPage> {
           itemCount: cards.length,
           initialActiveCard: activeCard,
           onCardTap: (index) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => CreditCardPage(initialIndex: index),
+            pushFadeInRoute(
+              context,
+              pageBuilder: (context, animation, __) => CreditCardPage(
+                initialIndex: index,
               ),
             );
           },
@@ -258,4 +259,31 @@ class _CreditCardsStackState extends State<CreditCardsStack>
       },
     );
   }
+}
+
+Future<dynamic> pushFadeInRoute(
+  BuildContext context, {
+  required RoutePageBuilder pageBuilder,
+}) {
+  return Navigator.of(context).push(
+    PageRouteBuilder(
+      pageBuilder: pageBuilder,
+      transitionDuration: pageTransitionDuration,
+      reverseTransitionDuration: pageTransitionDuration,
+      transitionsBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        _,
+        Widget child,
+      ) {
+        return FadeTransition(
+          opacity: CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOut,
+          ),
+          child: child,
+        );
+      },
+    ),
+  );
 }
