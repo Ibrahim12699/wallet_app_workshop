@@ -14,6 +14,7 @@ class OnBoardingPage extends StatefulWidget {
 class _OnBoardingPageState extends State<OnBoardingPage> {
   late final PageController pageController;
   static const viewportFraction = 0.7;
+  int activeIndex = 0;
 
   @override
   void initState() {
@@ -54,6 +55,11 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                     child: PageView.builder(
                       controller: pageController,
                       itemCount: onBoardingItems.length,
+                      onPageChanged: (int index) {
+                        setState(() {
+                          activeIndex = index;
+                        });
+                      },
                       itemBuilder: (context, index) {
                         return Container(
                           decoration: BoxDecoration(
@@ -88,8 +94,9 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ..._buildItemInfo(),
+                  ..._buildItemInfo(activeIndex: activeIndex),
                   PageIndicator(
+                    activeIndex: activeIndex,
                     length: onBoardingItems.length,
                   ),
                   FilledButton(
@@ -169,10 +176,12 @@ class PageIndicator extends StatelessWidget {
                 (index) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: Container(
-                    height: 5,
-                    width: inActiveWidth,
+                    height: index == activeIndex ? 8 : 5,
+                    width: index == activeIndex ? activeWidth : inActiveWidth,
                     decoration: BoxDecoration(
-                      color: AppColors.onBlack,
+                      color: index == activeIndex
+                          ? activeColor
+                          : AppColors.onBlack,
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
