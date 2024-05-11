@@ -6,6 +6,7 @@ import 'package:wallet_app_workshop/core/utils.dart';
 import 'package:wallet_app_workshop/credit-cards/credit_card.dart';
 import 'package:wallet_app_workshop/credit-cards/credit_card_page.dart';
 
+const pageTransitionDuration = Duration(milliseconds: 1000);
 const dragSnapDuration = Duration(milliseconds: 200);
 const dragThreshold = Offset(70, 70);
 const minCardScale = 0.6;
