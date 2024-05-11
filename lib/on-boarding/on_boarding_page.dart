@@ -175,7 +175,9 @@ class PageIndicator extends StatelessWidget {
                 length,
                 (index) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
                     height: index == activeIndex ? 8 : 5,
                     width: index == activeIndex ? activeWidth : inActiveWidth,
                     decoration: BoxDecoration(
