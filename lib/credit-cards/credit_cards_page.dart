@@ -64,6 +64,16 @@ class _CreditCardsPageState extends State<CreditCardsPage> {
               heightFactor: cardWidth / cardHeight,
               child: Hero(
                 tag: 'card_${cards[index].id}',
+                flightShuttleBuilder: (BuildContext context,
+                    Animation<double> animation, _, __, ___) {
+                  return Material(
+                    color: Colors.transparent,
+                    child: CreditCard(
+                      width: cardWidth,
+                      data: cards[index],
+                    ),
+                  );
+                },
                 child: Transform.rotate(
                   angle: -pi / 2,
                   child: CreditCard(
