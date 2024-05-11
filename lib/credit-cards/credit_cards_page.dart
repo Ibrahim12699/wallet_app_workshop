@@ -91,6 +91,9 @@ class CreditCardsStack extends StatefulWidget {
 class _CreditCardsStackState extends State<CreditCardsStack>
     with SingleTickerProviderStateMixin {
   late final AnimationController animationController;
+  late final Animation<double> curvedAnimation;
+  late final Animation<Offset> throwAnimation;
+  late final Tween<Offset> throwAnimationTween;
   int activeIndex = 0;
   Offset dragOffset = Offset.zero;
   Duration dragDuration = Duration.zero;
@@ -99,9 +102,15 @@ class _CreditCardsStackState extends State<CreditCardsStack>
       (maxCardScale - minCardScale) / (widget.itemCount - 1);
 
   Future<void> _handleRelease() async {
+    throwAnimationTween.end = getThrowOffsetFromDragLocation(
+      dragOffset,
+      minThrowDistance,
+    );
+    await animationController.forward();
     setState(() {
       activeIndex++;
     });
+    animationController.reset();
   }
 
   void _onPanStart(DragStartDetails details) {
@@ -139,6 +148,15 @@ class _CreditCardsStackState extends State<CreditCardsStack>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
+    curvedAnimation = CurvedAnimation(
+      parent: animationController,
+      curve: Curves.easeOut,
+    );
+    throwAnimationTween = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(minThrowDistance, minThrowDistance),
+    );
+    throwAnimation = throwAnimationTween.animate(curvedAnimation);
   }
 
   @override
@@ -149,73 +167,81 @@ class _CreditCardsStackState extends State<CreditCardsStack>
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: List.generate(
-        widget.itemCount + 1,
-        (stackIndexWithPlaceholder) {
-          final index = stackIndexWithPlaceholder - 1;
-          final modIndex = getModIndexFromActiveIndex(
-            index,
-            activeIndex,
-            widget.itemCount,
-          );
+    return AnimatedBuilder(
+        animation: animationController,
+        builder: (context, _) {
+          return Stack(
+            clipBehavior: Clip.none,
+            children: List.generate(
+              widget.itemCount + 1,
+              (stackIndexWithPlaceholder) {
+                final index = stackIndexWithPlaceholder - 1;
+                final modIndex = getModIndexFromActiveIndex(
+                  index,
+                  activeIndex,
+                  widget.itemCount,
+                );
 
-          Widget child = widget.itemBuilder(context, modIndex);
+                Widget child = widget.itemBuilder(context, modIndex);
 
-          // Build the hidden placeholder card
-          if (stackIndexWithPlaceholder == 0) {
-            return Positioned(
-              top: 0,
-              left: 0,
-              child: Transform.scale(
-                scale: minCardScale,
-                alignment: Alignment.topCenter,
-                child: child,
-              ),
-            );
-          }
+                // Build the hidden placeholder card
+                if (stackIndexWithPlaceholder == 0) {
+                  return Positioned(
+                    top: 0,
+                    left: 0,
+                    child: Transform.scale(
+                      scale: minCardScale,
+                      alignment: Alignment.topCenter,
+                      child: child,
+                    ),
+                  );
+                }
 
-          // Build the last, draggable card
-          if (index == widget.itemCount - 1) {
-            return AnimatedPositioned(
-              duration: dragDuration,
-              left: dragOffset.dx,
-              bottom: -dragOffset.dy,
-              child: GestureDetector(
-                onPanStart: _onPanStart,
-                onPanUpdate: _onPanUpdate,
-                onPanEnd: _onPanEnd,
-                onTap: () => widget.onCardTap?.call(modIndex),
-                behavior: HitTestBehavior.opaque,
-                child: child,
-              ),
-            );
-          }
+                // Build the last, draggable card
+                if (index == widget.itemCount - 1) {
+                  return AnimatedPositioned(
+                    duration: dragDuration,
+                    left: dragOffset.dx,
+                    bottom: -dragOffset.dy,
+                    child: Transform.translate(
+                      offset: throwAnimation.value,
+                      child: GestureDetector(
+                        onPanStart: _onPanStart,
+                        onPanUpdate: _onPanUpdate,
+                        onPanEnd: _onPanEnd,
+                        onTap: () => widget.onCardTap?.call(modIndex),
+                        behavior: HitTestBehavior.opaque,
+                        child: child,
+                      ),
+                    ),
+                  );
+                }
 
-          // Build the cards in between (remaining cards)
-          /// To gradually scale down widgets, limited by min and max scales
-          final scaleByIndex = minCardScale +
-              ((maxCardScale - minCardScale) / (widget.itemCount - 1)) * index;
+                // Build the cards in between (remaining cards)
+                /// To gradually scale down widgets, limited by min and max scales
+                final scaleByIndex = minCardScale +
+                    ((maxCardScale - minCardScale) / (widget.itemCount - 1)) *
+                        index;
 
-          // Slide cards up gradually
-          final bottomOffsetByIndex =
-              -cardsOffset * (widget.itemCount - 1 - index);
+                // Slide cards up gradually
+                final bottomOffsetByIndex =
+                    -cardsOffset * (widget.itemCount - 1 - index);
 
-          return Positioned(
-            left: 0,
-            bottom: 0,
-            child: Transform.translate(
-              offset: Offset(0, bottomOffsetByIndex),
-              child: Transform.scale(
-                scale: scaleByIndex,
-                alignment: Alignment.topCenter,
-                child: child,
-              ),
+                return Positioned(
+                  left: 0,
+                  bottom: 0,
+                  child: Transform.translate(
+                    offset: Offset(0, bottomOffsetByIndex),
+                    child: Transform.scale(
+                      scale: scaleByIndex,
+                      alignment: Alignment.topCenter,
+                      child: child,
+                    ),
+                  ),
+                );
+              },
             ),
           );
-        },
-      ),
-    );
+        });
   }
 }
