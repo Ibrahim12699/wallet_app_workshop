@@ -211,7 +211,10 @@ class _CreditCardsStackState extends State<CreditCardsStack>
                         onPanEnd: _onPanEnd,
                         onTap: () => widget.onCardTap?.call(modIndex),
                         behavior: HitTestBehavior.opaque,
-                        child: child,
+                        child: Opacity(
+                          opacity: 1 - curvedAnimation.value,
+                          child: child,
+                        ),
                       ),
                     ),
                   );
