@@ -73,35 +73,47 @@ class _OnBoardingPageState extends State<OnBoardingPage>
                     child: WalletSide(),
                   ),
                   Positioned.fill(
-                    child: PageView.builder(
-                      controller: pageController,
-                      itemCount: onBoardingItems.length,
-                      onPageChanged: (int index) {
-                        setState(() {
-                          activeIndex = index;
-                        });
-                        animationController.forward().then(
-                              (value) => animationController.reverse(),
-                            );
+                    child: GestureDetector(
+                      onTapDown: (_) => animationController.forward(),
+                      onTapUp: (_) => animationController.reverse(),
+                      onTapCancel: () {
+                        if (animationController.status ==
+                                AnimationStatus.forward ||
+                            animationController.status ==
+                                AnimationStatus.completed) {
+                          animationController.reverse();
+                        }
                       },
-                      itemBuilder: (context, index) {
-                        return AnimatedScale(
-                          duration: const Duration(milliseconds: 300),
-                          scale: index == activeIndex ? 1 : 0.8,
-                          curve: Curves.easeOut,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.onBlack,
-                              borderRadius: BorderRadius.circular(25),
-                              image: DecorationImage(
-                                image:
-                                    AssetImage(onBoardingItems[index].image),
-                                fit: BoxFit.fitWidth,
+                      child: PageView.builder(
+                        controller: pageController,
+                        itemCount: onBoardingItems.length,
+                        onPageChanged: (int index) {
+                          setState(() {
+                            activeIndex = index;
+                          });
+                          animationController.forward().then(
+                                (value) => animationController.reverse(),
+                              );
+                        },
+                        itemBuilder: (context, index) {
+                          return AnimatedScale(
+                            duration: const Duration(milliseconds: 300),
+                            scale: index == activeIndex ? 1 : 0.8,
+                            curve: Curves.easeOut,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.onBlack,
+                                borderRadius: BorderRadius.circular(25),
+                                image: DecorationImage(
+                                  image:
+                                      AssetImage(onBoardingItems[index].image),
+                                  fit: BoxFit.fitWidth,
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
                   Positioned(
