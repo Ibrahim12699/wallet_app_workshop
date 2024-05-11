@@ -6,7 +6,7 @@ import 'package:wallet_app_workshop/core/utils.dart';
 import 'package:wallet_app_workshop/credit-cards/credit_card.dart';
 import 'package:wallet_app_workshop/credit-cards/credit_card_page.dart';
 
-const pageTransitionDuration = Duration(milliseconds: 800);
+const pageTransitionDuration = Duration(milliseconds: 1000);
 const dragSnapDuration = Duration(milliseconds: 200);
 const dragThreshold = Offset(70, 70);
 const minCardScale = 0.6;
@@ -74,6 +74,18 @@ class _CreditCardsPageState extends State<CreditCardsPage> {
                     ),
                   );
 
+                  final flipAnimation =
+                      Tween<double>(begin: 0, end: pi).animate(
+                    CurvedAnimation(
+                      parent: animation,
+                      curve: const Interval(
+                        0.3,
+                        1.0,
+                        curve: Curves.easeOut,
+                      ),
+                    ),
+                  );
+
                   return Material(
                     color: Colors.transparent,
                     child: AnimatedBuilder(
@@ -81,11 +93,17 @@ class _CreditCardsPageState extends State<CreditCardsPage> {
                       builder: (context, child) {
                         return Transform(
                           transform: Matrix4.identity()
+                            ..setEntry(3, 2, 0.001)
+                            ..rotateX(flipAnimation.value)
                             ..rotateZ(rotationAnimation.value),
                           alignment: Alignment.center,
-                          child: CreditCard(
-                            width: cardWidth,
-                            data: cards[index],
+                          child: Transform.flip(
+                            flipX: animation.value > 0.5,
+                            child: CreditCard(
+                              width: cardWidth,
+                              data: cards[index],
+                              isFront: animation.value > 0.5,
+                            ),
                           ),
                         );
                       },
