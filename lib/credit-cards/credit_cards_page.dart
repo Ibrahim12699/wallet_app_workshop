@@ -66,11 +66,29 @@ class _CreditCardsPageState extends State<CreditCardsPage> {
                 tag: 'card_${cards[index].id}',
                 flightShuttleBuilder: (BuildContext context,
                     Animation<double> animation, _, __, ___) {
+                  final rotationAnimation =
+                      Tween<double>(begin: -pi / 2, end: pi).animate(
+                    CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOut,
+                    ),
+                  );
+
                   return Material(
                     color: Colors.transparent,
-                    child: CreditCard(
-                      width: cardWidth,
-                      data: cards[index],
+                    child: AnimatedBuilder(
+                      animation: animation,
+                      builder: (context, child) {
+                        return Transform(
+                          transform: Matrix4.identity()
+                            ..rotateZ(rotationAnimation.value),
+                          alignment: Alignment.center,
+                          child: CreditCard(
+                            width: cardWidth,
+                            data: cards[index],
+                          ),
+                        );
+                      },
                     ),
                   );
                 },
