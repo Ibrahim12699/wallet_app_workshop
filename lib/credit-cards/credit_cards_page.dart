@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:wallet_app_workshop/core/data.dart';
+import 'package:wallet_app_workshop/core/utils.dart';
 import 'package:wallet_app_workshop/credit-cards/credit_card.dart';
 import 'package:wallet_app_workshop/credit-cards/credit_card_page.dart';
 
@@ -89,16 +90,19 @@ class CreditCardsStack extends StatefulWidget {
 class _CreditCardsStackState extends State<CreditCardsStack>
     with SingleTickerProviderStateMixin {
   late final AnimationController animationController;
+  int activeIndex = 0;
 
   double get scaleDifference =>
       (maxCardScale - minCardScale) / (widget.itemCount - 1);
 
   Future<void> _handleDismiss() async {
-    //...
+    setState(() {
+      activeIndex++;
+    });
   }
 
   void _onPanStart(DragStartDetails details) {
-    _handleDismiss();
+    //...
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
@@ -106,7 +110,7 @@ class _CreditCardsStackState extends State<CreditCardsStack>
   }
 
   void _onPanEnd(DragEndDetails details) {
-    //...
+    _handleDismiss();
   }
 
   @override
@@ -114,7 +118,7 @@ class _CreditCardsStackState extends State<CreditCardsStack>
     super.initState();
     animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 200),
     );
   }
 
@@ -129,9 +133,29 @@ class _CreditCardsStackState extends State<CreditCardsStack>
     return Stack(
       clipBehavior: Clip.none,
       children: List.generate(
-        widget.itemCount,
-        (index) {
-          Widget child = widget.itemBuilder(context, index);
+        widget.itemCount + 1,
+        (stackIndexWithPlaceholder) {
+          final index = stackIndexWithPlaceholder - 1;
+          final modIndex = getModIndexFromActiveIndex(
+            index,
+            activeIndex,
+            widget.itemCount,
+          );
+
+          Widget child = widget.itemBuilder(context, modIndex);
+
+          // Build the hidden placeholder card
+          if (stackIndexWithPlaceholder == 0) {
+            return Positioned(
+              top: 0,
+              left: 0,
+              child: Transform.scale(
+                scale: minCardScale,
+                alignment: Alignment.topCenter,
+                child: child,
+              ),
+            );
+          }
 
           // Build the last, draggable card
           if (index == widget.itemCount - 1) {
@@ -142,7 +166,7 @@ class _CreditCardsStackState extends State<CreditCardsStack>
                 onPanStart: _onPanStart,
                 onPanUpdate: _onPanUpdate,
                 onPanEnd: _onPanEnd,
-                onTap: () => widget.onCardTap?.call(index),
+                onTap: () => widget.onCardTap?.call(modIndex),
                 behavior: HitTestBehavior.opaque,
                 child: child,
               ),
