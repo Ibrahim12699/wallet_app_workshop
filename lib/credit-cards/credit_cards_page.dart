@@ -92,6 +92,7 @@ class _CreditCardsStackState extends State<CreditCardsStack>
     with SingleTickerProviderStateMixin {
   late final AnimationController animationController;
   int activeIndex = 0;
+  Offset dragOffset = Offset.zero;
 
   double get scaleDifference =>
       (maxCardScale - minCardScale) / (widget.itemCount - 1);
@@ -107,11 +108,24 @@ class _CreditCardsStackState extends State<CreditCardsStack>
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
-    //...
+    setState(() {
+      dragOffset += details.delta;
+    });
   }
 
   void _onPanEnd(DragEndDetails details) {
-    _handleRelease();
+    if (dragOffset.dx.abs() > dragThreshold.dx ||
+        dragOffset.dy.abs() > dragThreshold.dy) {
+      _handleRelease().then((_) {
+        setState(() {
+          dragOffset = Offset.zero;
+        });
+      });
+    } else {
+      setState(() {
+        dragOffset = Offset.zero;
+      });
+    }
   }
 
   @override
@@ -161,8 +175,8 @@ class _CreditCardsStackState extends State<CreditCardsStack>
           // Build the last, draggable card
           if (index == widget.itemCount - 1) {
             return Positioned(
-              left: 0,
-              bottom: 0,
+              left: dragOffset.dx,
+              bottom: -dragOffset.dy,
               child: GestureDetector(
                 onPanStart: _onPanStart,
                 onPanUpdate: _onPanUpdate,
