@@ -50,7 +50,13 @@ class _CreditCardsPageState extends State<CreditCardsPage> {
               pageBuilder: (context, animation, __) => CreditCardPage(
                 initialIndex: index,
               ),
-            );
+            ).then((value) {
+              if (value != null && value is int) {
+                setState(() {
+                  activeCard = value;
+                });
+              }
+            });
           },
           itemBuilder: (context, index) {
             return Align(
@@ -98,7 +104,7 @@ class _CreditCardsStackState extends State<CreditCardsStack>
   late final Animation<double> curvedAnimation;
   late final Animation<Offset> throwAnimation;
   late final Tween<Offset> throwAnimationTween;
-  int activeIndex = 0;
+  late int activeIndex;
   Offset dragOffset = Offset.zero;
   Duration dragDuration = Duration.zero;
 
@@ -148,6 +154,7 @@ class _CreditCardsStackState extends State<CreditCardsStack>
   @override
   void initState() {
     super.initState();
+    activeIndex = widget.initialActiveCard;
     animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
@@ -161,6 +168,16 @@ class _CreditCardsStackState extends State<CreditCardsStack>
       end: const Offset(minThrowDistance, minThrowDistance),
     );
     throwAnimation = throwAnimationTween.animate(curvedAnimation);
+  }
+
+  @override
+  void didUpdateWidget(covariant CreditCardsStack oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialActiveCard != oldWidget.initialActiveCard) {
+      setState(() {
+        activeIndex = widget.initialActiveCard;
+      });
+    }
   }
 
   @override
