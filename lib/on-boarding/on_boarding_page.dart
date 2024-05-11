@@ -61,13 +61,18 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                         });
                       },
                       itemBuilder: (context, index) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.onBlack,
-                            borderRadius: BorderRadius.circular(25),
-                            image: DecorationImage(
-                              image: AssetImage(onBoardingItems[index].image),
-                              fit: BoxFit.fitWidth,
+                        return AnimatedScale(
+                          duration: const Duration(milliseconds: 300),
+                          scale: index == activeIndex ? 1 : 0.8,
+                          curve: Curves.easeOut,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.onBlack,
+                              borderRadius: BorderRadius.circular(25),
+                              image: DecorationImage(
+                                image: AssetImage(onBoardingItems[index].image),
+                                fit: BoxFit.fitWidth,
+                              ),
                             ),
                           ),
                         );
