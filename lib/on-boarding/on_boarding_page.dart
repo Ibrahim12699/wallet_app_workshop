@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:wallet_app_workshop/core/data.dart';
 import 'package:wallet_app_workshop/core/styles.dart';
@@ -11,7 +13,10 @@ class OnBoardingPage extends StatefulWidget {
   State<OnBoardingPage> createState() => _OnBoardingPageState();
 }
 
-class _OnBoardingPageState extends State<OnBoardingPage> {
+class _OnBoardingPageState extends State<OnBoardingPage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController animationController;
+  late final Animation<double> rotationAnimation;
   late final PageController pageController;
   static const viewportFraction = 0.7;
   int activeIndex = 0;
@@ -19,7 +24,23 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   @override
   void initState() {
     pageController = PageController(viewportFraction: viewportFraction);
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    final curvedAnimation = CurvedAnimation(
+      parent: animationController,
+      curve: Curves.easeOut,
+    );
+    rotationAnimation =
+        Tween<double>(begin: 0, end: 30 * pi / 180).animate(curvedAnimation);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -59,6 +80,9 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                         setState(() {
                           activeIndex = index;
                         });
+                        animationController.forward().then(
+                              (value) => animationController.reverse(),
+                            );
                       },
                       itemBuilder: (context, index) {
                         return AnimatedScale(
@@ -70,7 +94,8 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                               color: AppColors.onBlack,
                               borderRadius: BorderRadius.circular(25),
                               image: DecorationImage(
-                                image: AssetImage(onBoardingItems[index].image),
+                                image:
+                                    AssetImage(onBoardingItems[index].image),
                                 fit: BoxFit.fitWidth,
                               ),
                             ),
@@ -79,12 +104,23 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                       },
                     ),
                   ),
-                  const Positioned(
+                  Positioned(
                     left: -250 + 35,
                     width: 250,
                     top: -30,
                     bottom: -30,
-                    child: WalletSide(),
+                    child: AnimatedBuilder(
+                      animation: animationController,
+                      builder: (context, child) {
+                        return Transform(
+                          transform: Matrix4.identity()
+                            ..setEntry(3, 2, 0.001)
+                            ..rotateY(rotationAnimation.value),
+                          alignment: Alignment.center,
+                          child: const WalletSide(),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
