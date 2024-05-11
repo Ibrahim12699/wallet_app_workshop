@@ -49,6 +49,7 @@ class _CreditCardsPageState extends State<CreditCardsPage> {
               context,
               pageBuilder: (context, animation, __) => CreditCardPage(
                 initialIndex: index,
+                pageTransitionAnimation: animation,
               ),
             ).then((value) {
               if (value != null && value is int) {

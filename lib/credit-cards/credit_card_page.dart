@@ -9,15 +9,18 @@ class CreditCardPage extends StatefulWidget {
   const CreditCardPage({
     super.key,
     required this.initialIndex,
+    required this.pageTransitionAnimation,
   });
 
   final int initialIndex;
+  final Animation<double> pageTransitionAnimation;
 
   @override
   State<CreditCardPage> createState() => _CreditCardPageState();
 }
 
 class _CreditCardPageState extends State<CreditCardPage> {
+  late final Animation<Offset> slideAnimation;
   late final PageController pageController;
   late int activeIndex;
 
@@ -29,6 +32,15 @@ class _CreditCardPageState extends State<CreditCardPage> {
       viewportFraction: 0.85,
     );
     activeIndex = widget.initialIndex;
+    slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1.5),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: widget.pageTransitionAnimation,
+        curve: Curves.easeOut,
+      ),
+    );
   }
 
   @override
@@ -59,17 +71,20 @@ class _CreditCardPageState extends State<CreditCardPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 _buildCardsPageView(context),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Column(
-                    children: [
-                      PageIndicator(
-                        length: cards.length,
-                        activeIndex: activeIndex,
-                        activeColor: cards[activeIndex].style.color,
-                      ),
-                      _buildButtons(),
-                    ],
+                SlideTransition(
+                  position: slideAnimation,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: Column(
+                      children: [
+                        PageIndicator(
+                          length: cards.length,
+                          activeIndex: activeIndex,
+                          activeColor: cards[activeIndex].style.color,
+                        ),
+                        _buildButtons(),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -78,7 +93,10 @@ class _CreditCardPageState extends State<CreditCardPage> {
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: _buildLatestTransactionsSection(),
+              child: SlideTransition(
+                position: slideAnimation,
+                child: _buildLatestTransactionsSection(),
+              ),
             ),
           ),
         ],
